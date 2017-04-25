@@ -258,7 +258,13 @@ extern "C" void UnitySendMessage(const char *, const char *, const char *);
     }
     NSURL *url = [navigationAction.request URL];
     if ([url.absoluteString rangeOfString:@"//itunes.apple.com/"].location != NSNotFound) {
-        [[UIApplication sharedApplication] openURL:url];
+        if ([[UIApplication sharedApplication] respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+            // iOS10 or later
+            [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
+        } else {
+            // iOS9 or earlier
+            [[UIApplication sharedApplication] openURL:url];
+        }
         decisionHandler(WKNavigationActionPolicyCancel);
     } else if ([url.absoluteString hasPrefix:@"unity:"]) {
         UnitySendMessage([gameObjectName UTF8String], "CallFromJS", [[url.absoluteString substringFromIndex:6] UTF8String]);
